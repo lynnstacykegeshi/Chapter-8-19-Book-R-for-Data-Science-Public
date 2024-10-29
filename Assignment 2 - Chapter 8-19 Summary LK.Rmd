@@ -1,0 +1,176 @@
+---
+title: "Assignment 1 - Chapter 8-19 Summary LK"
+author: "Lynnstacy Kegeshi"
+date: "2024-10-28"
+output: 
+        html_document:
+          toc: yes
+        pdf_document: 
+          toc: yes
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+This is a summary of Chapter 8-19 of the book **R for Data Science**. We shall be using be data set *House Sale* to perform our analysis based on the content from Chapter 8 - 19
+
+We shall be using the following libraries
+```{r, echo=TRUE, results='hide'}
+library(tidyverse)
+```
+
+# Chapter 8
+This chapter focuses on importing data into R, specifically using the read r package which is part of tidyverse.
+
+## Reading Data into R Studio
+Most functions in readr are designed to turn flat files into data frames. Key functions include:
+
+- read_csv(): Reads comma-delimited files.
+- read_csv2(): Reads semicolon-separated files.
+- read_tsv(): Reads tab-delimited files.
+- read_delim(): Reads files with any delimiter.
+- read_fwf(): Reads fixed-width files.
+- read_log(): Reads Apache-style log files.
+
+Using the read_csv(), we imported the HouseSale Data to illustrate this fucntion.
+
+```{r}
+house_sale<- read.csv("HouseSale.csv")
+head(house_sale)
+```
+
+You can also customize the import of data through the following options.
+
+1. Skipping Metadata: Use skip = n to skip the first n lines or comment = "#".
+2. No Column Names: Use col_names = FALSE to treat the first row as data.
+3. Custom Column Names: Pass a character vector to col_names.
+4. Handling Missing Values: Use the na argument to specify missing value representations.
+
+## Writing into a file
+`readr also provides functions for writing data back to disk:
+
+- write_csv(): Writes CSV files.
+- write_tsv(): Writes tab-separated files.
+- write_excel_csv(): Writes CSV files for Excel.
+- write_rds() and read_rds(): Store data in R's custom binary format.
+- write_feather() and read_feather(): Use the feather package for fast binary file format.
+
+## Parsing Vectors
+The parse_*() functions are designed to convert character vectors into more specialized types. Here are some of the most commonly used functions
+
+- parse_logical(): Parses logical values.
+- parse_integer(): Parses integer values.
+- parse_double(): Parses double (numeric) values.
+- parse_number(): Parses numbers, ignoring non-numeric characters.
+- parse_character(): Parses character strings.
+- parse_factor(): Parses factors.
+- parse_datetime(): Parses date-time values.
+- parse_date(): Parses date values.
+- parse_time(): Parses time values.
+
+```{r}
+# Parsing logical values
+logical_vector <- parse_logical(c("TRUE", "FALSE", "NA"))
+print(logical_vector)
+#> [1] TRUE FALSE NA
+
+# Parsing integer values
+integer_vector <- parse_integer(c("1", "2", "3"))
+print(integer_vector)
+#> [1] 1 2 3
+
+# Parsing double values
+double_vector <- parse_double(c("1.23", "4.56", "7.89"))
+print(double_vector)
+#> [1] 1.23 4.56 7.89
+
+# Parsing numbers with non-numeric characters
+number_vector <- parse_number(c("$100", "20%", "It cost $123.45"))
+print(number_vector)
+#> [1] 100  20 123.45
+
+# Parsing date values
+date_vector <- parse_date(c("2010-01-01", "1979-10-14"))
+print(date_vector)
+#> [1] "2010-01-01" "1979-10-14"
+```
+We check the structure of our data to see if we need to parse any data.
+
+```{r}
+str(house_sale)
+```
+Since our data(House Sale) is already structured with the correct types the parse_* functions are unnecessary here. 
+
+# Chapter 9
+
+This chapter introduces the concept of tidy data, a consistent way to organize data in R. This is done using tidyr which is a package inside tidyverse.
+
+Tidy data is organized according to three interrelated rules:
+
+1. Each variable must have its own column.
+2. Each observation must have its own row.
+3. Each value must have its own cell.
+
+Tidy data has two main advantages: **Consistency** and **Efficiency**
+
+## Missing Values
+Missing values can be explicit (flagged with NA) or implicit (not present in the data). tidyr provides tools to handle missing values:
+
+complete(): Ensures all combinations of variables are present, filling in missing values with NA.
+Applying this to our data where StreetHouseFront had explicit missing values, we filled missing values with the median on non missing values.
+
+```{r}
+# Fill missing StreetHouseFront values with the median of non-missing values
+house_sale <- house_sale %>%
+  mutate(StreetHouseFront2 = ifelse(is.na(StreetHouseFront), median(StreetHouseFront, na.rm = TRUE), StreetHouseFront))
+
+#Chcking if NAs had been replaced.
+head(house_sale$StreetHouseFront)
+head(house_sale$StreetHouseFront2)
+```
+fill(): Fills missing values with the most recent non-missing value.
+
+```{r}
+# Fill NA values in StreetHouseFront with the most recent non-NA value
+house_sale3 <- house_sale %>%
+  fill(StreetHouseFront)
+
+#Chcking if NAs had been replaced.
+head(house_sale$StreetHouseFront)
+head(house_sale3$StreetHouseFront)
+
+```
+The chapter also provides examples of working with tidy data using dplyr and ggplot2
+
+```{r}
+# Calculate average house price by Location
+house_sale %>%
+  group_by(Location) %>%
+  summarize(avg_price = mean(HousePrice, na.rm = TRUE))#na.rm ignores missing values
+```
+```{r}
+# Calculate average rating by SellingYear
+avg_rating_per_year <- house_sale %>%
+  group_by(SellingYear) %>%
+  summarize(avg_rating = mean(Rating, na.rm = TRUE))
+
+# Plot average rating over time
+ggplot(avg_rating_per_year, aes(x = SellingYear, y = avg_rating)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  labs(title = "Average Property Rating Over the Years", x = "Year Sold", y = "Average Rating") +
+  theme_minimal()
+```
+
+Most real-world data is not tidy. Two common problems are:
+
+- One variable spread across multiple columns.
+- One observation scattered across multiple rows.
+
+To address these issues, tidyr provides two key functions: gather() and spread().
+
+'separate() and unite() are used to split and combine columns, respectively.
+
