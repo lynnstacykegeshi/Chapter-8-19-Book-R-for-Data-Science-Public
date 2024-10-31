@@ -3,9 +3,9 @@ title: "Assignment 1 - Chapter 8-19 Summary LK"
 author: "Lynnstacy Kegeshi"
 date: "2024-10-28"
 output: 
-        html_document:
-          toc: yes
         pdf_document: 
+          toc: yes
+        html_document:
           toc: yes
 ---
 
@@ -20,6 +20,10 @@ This is a summary of Chapter 8-19 of the book **R for Data Science**. We shall b
 We shall be using the following libraries
 ```{r, echo=TRUE, results='hide'}
 library(tidyverse)
+library(stringr)
+library(forcats) # Factor manipulation
+library(lubridate) # Date and time
+library(magrittr) #For Pipe operation
 ```
 
 # Chapter 8
@@ -122,6 +126,7 @@ Missing values can be explicit (flagged with NA) or implicit (not present in the
 complete(): Ensures all combinations of variables are present, filling in missing values with NA.
 Applying this to our data where StreetHouseFront had explicit missing values, we filled missing values with the median on non missing values.
 
+##Applying ggplot and dplyr on tidydata
 ```{r}
 # Fill missing StreetHouseFront values with the median of non-missing values
 house_sale <- house_sale %>%
@@ -174,3 +179,384 @@ To address these issues, tidyr provides two key functions: gather() and spread()
 
 'separate() and unite() are used to split and combine columns, respectively.
 
+# Chapter 10
+Keys are variables that uniquely identify an observation. There are two types of keys:
+
+1. Primary Key: Uniquely identifies an observation in its own table.
+2. Foreign Key: Uniquely identifies an observation in another table.
+
+## Mutating Joins
+Mutating joins combine variables from two tables by matching observations based on their keys.
+
+- inner_join(): Matches pairs of observations where keys are equal.
+- left_join(): Keeps all observations in the left table.
+- right_join(): Keeps all observations in the right table.
+- full_join(): Keeps all observations in both tables.
+
+Joins are visualized by matching rows based on key variables. 
+
+## Filtering Joins
+Filtering joins match observations and affect the observations, not the variables:
+
+semi_join(): Keeps all observations in the left table that have a match in the right table.
+anti_join(): Drops all observations in the left table that have a match in the right table.
+
+## Set Operations
+You can use set operations to compare data in tables.
+
+Use intersect()if you have two tables with house data and want to find common entries,
+Use union() to combine two tables without duplicates.
+Use setdiff() to find rows present in one table but not in the other
+
+When working with real data, identify the primary keys and make sure no primary key variables are missing 
+Using anti_join() to check if all foreign key values in one table match primary key values in another.
+
+
+# Chapter 11: Strings with stringr
+It introduces string manipulation in R using stringr which is part of the stringr package.
+
+## String Basics
+Strings can be created using either single or double quotes. To include special characters like quotes or backslashes, use the escape character `\.` The writeLines() function shows the raw contents of a string.
+
+## String Length
+The str_length() function from stringr tells you the number of characters in a string:
+
+```{r}
+str_length(c("a", "R for data science", NA))
+
+```
+## Combining Strings
+Use str_c() to combine two or more strings. The sep argument controls how they are separated, and collapse collapses a vector of strings into a single string:
+
+```{r}
+# Add details column, which is combines Location and BuildingType
+house_sale <- house_sale %>%
+  mutate(details = str_c(Location, BuildingType, sep = ", "))
+
+head(house_sale$details)
+```
+
+
+## Subsetting Strings
+The str_sub() function extracts parts of a string based on start and end positions. It can also be used to modify strings:
+
+```{r}
+x <- c("Apple", "Banana", "Pear")
+str_sub(x, 1, 3)
+```
+## Locales
+Functions like str_to_lower(), str_to_upper(), and str_to_title() change the case of text. We changed the case of the vectors in Building Type to small letters with the code below:
+
+```{r}
+house_sale <- house_sale %>%
+    mutate(BuildingType = str_to_lower(BuildingType))
+
+head(house_sale$BuildingType)
+```
+
+## Anchors
+Anchors like ^ and $ match the start and end of a string, respectively. The word boundary \b matches the boundary between words.
+
+## Character Classes and Alternatives
+Special patterns match more than one character:
+
+- `\d` matches any digit.
+- `\s` matches any whitespace.
+- [abc] matches a, b, or c.
+- [^abc] matches anything except a, b, or c.
+
+## Tools
+Various stringr functions apply regexps to real problems:
+
+1. str_detect(): Determines if a character vector matches a pattern.
+2. str_extract(): Extracts the actual text of a match.
+3. str_replace() and str_replace_all(): Replace matches with new values.
+4. str_split(): Splits a string into pieces.
+5. str_locate() and str_locate_all(): Give the starting and ending positions of each match.
+
+# Chapter 12: Forecasts with Forecat
+In R, factors are used to work with categorical variables, which have a fixed and known set of possible values. 
+To work with factors, the forcats package is used, which provides tools for dealing with categorical variables. 
+
+## Creating Factors
+When recording variables like months, using strings can lead to issues such as typos and unhelpful sorting. These problems can be fixed by creating a factor with a predefined list of valid levels. For example:
+
+```{r}
+x1 <- c("Dec", "Apr", "Jan", "Mar")
+month_levels <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+y1 <- factor(x1, levels = month_levels)
+y1
+```
+## Modifying Factor Order
+Changing the order of factor levels in visualizations can make patterns easier to interpret. Functions like fct_reorder() and fct_relevel() are used to reorder levels based on specific criteria. For example, we can reorder Building type based on houseprice.
+
+```{r}
+# Reorder BuildingType based on average HousePrice
+house_sale %>%
+  ggplot(aes(x = HousePrice, y = fct_reorder(BuildingType, HousePrice))) + 
+  geom_point() + 
+  labs(title = "House Prices by Building Type", x = "House Price", y = "Building Type")
+
+
+```
+
+## Modifying Factor Levels
+Changing the values of factor levels can clarify labels and collapse levels for high-level displays. The fct_recode() function allows users to recode factor levels. Basically renaming.
+
+```{r}
+#Converting EstateType from character to factor
+
+house_sale <- house_sale %>%
+  mutate(EstateType = as.factor(EstateType))
+
+# Recode EstateType levels
+house_sale <- house_sale %>% 
+  mutate(EstateTypeNew = fct_recode(EstateType, 
+                                 "Private-Builder" = "PrivateBuilder", 
+                                 "Semi-Private" = "SemiPrivate",
+                                 "Gvt-Build" = "GovernmentBuild",
+                                 "Community" = "Society",
+                                 "Other" = "Other"))
+
+head(house_sale$EstateTypeNew)
+
+```
+
+To combine groups, multiple old levels can be assigned to the same new level. For collapsing many levels, fct_collapse() is useful. 
+
+```{r}
+#Converting EstateType from character to factor
+house_sale <- house_sale %>%
+  mutate(SaleType = as.factor(SaleType))
+
+# Collapse SaleType levels into broader categories
+house_sale <- house_sale %>% 
+  mutate(SaleType2 = fct_collapse(SaleType, 
+                                  "New" = c("NewHouse"), 
+                                  "Old" = c("FifthResale", "FirstResale", "FourthResale", "SecondResale","ThirdResale")))
+
+# Count new sale types
+print(head(house_sale$SaleType2))
+
+```
+# Chapter 13: Date and times wit lubridate
+This chapter explored working with dates and time in R. This will be done using the lubridate package.
+
+There are three types of date/time data that refer to an instant in time:
+
+1. A date. Tibbles print this as <date>.
+2. A time within a day. Tibbles print this as <time>.
+3. A datetime is a date plus a time: it uniquely identifies an instant in time (typically to the nearest second). Tibbles print this as <dttm>. Elsewhere in R these are called POSIXct.
+To get the current date or datetime you can use today() or now():
+
+```{r}
+today()
+now()
+```
+
+## From Strings
+Date/time data often comes as strings. lubridate provides helpers that automatically work out the format once you specify the order of the component. For example:
+
+```{r}
+ymd("2017-01-31")         
+mdy("January 31st, 2017") 
+dmy("31-Jan-2017")        
+```
+
+To create a datetime, add an underscore and one or more of “h”, “m”, and “s” to the name of the parsing function:
+
+```{r}
+ymd_hms("2017-01-31 20:11:59") 
+mdy_hm("01/31/2017 08:01")    
+```
+In some instances, different components of the datetime will be spread across multiple columns. To create a date/time from this sort of input, use make_date() for dates, or make_datetime() for datetimes.
+
+You may want to switch between a datetime and a date. That’s the job of as_datetime() and as_date()
+
+# Getting Components
+You can pull out individual parts of the date with the accessor functions year(), month(), mday() (day of the month), yday() (day of the year), wday() (day of the week), hour(), minute(), and second().
+
+```{r}
+datetime <- ymd_hms("2016-07-08 12:34:56")
+year(datetime)   
+month(datetime)  
+mday(datetime)   
+yday(datetime)   
+wday(datetime)   
+
+```
+For month() and wday() you can set label = TRUE to return the abbreviated name of the month or day of the week. 
+
+## Time Spans
+These classes represent time spans.
+
+- Durations, which represent an exact number of seconds.
+- Periods, which represent human units like weeks and months.
+- Intervals, which represent a starting and ending point.
+
+In R, when you subtract two dates, you get a difftime object.
+
+Now for durations, durations come with a number of convenient constructors.
+
+```{r}
+dseconds(15)   
+dminutes(10)   
+dhours(c(12, 24)) 
+ddays(0:5)    
+dweeks(3)      
+dyears(1) 
+
+```
+
+Periods are time spans but do not have a fixed length in seconds; instead, they work with “human” times, like days and months.
+
+```{r}
+one_pm <- ymd_hms("2016-03-12 13:00:00", tz = "America/New_York")
+one_pm + days(1)
+
+```
+Period can also be constructed with friendly constructors.
+
+```{r}
+seconds(15)    
+minutes(10)    
+hours(c(12, 24)) 
+days(7)       
+months(1:6)    
+weeks(3)       
+years(1)      
+```
+## Timezones
+One can find out what R thinks the current time zone is with Sys.timezone()
+And see the complete list of all time zone names with OlsonNames()
+
+```{r}
+Sys.timezone()
+length(OlsonNames())
+head(OlsonNames())  
+```
+
+
+# Chapter 14: Pipes with magrittr
+Pipes are used to express a sequence of multiple operations. Since the tidyverse library automatically loads dplyr and %>%, we won’t need to load magrittr explicitly.Applying the learnings of this chapter to my house_sale data:
+
+## Basic Pipe (%>%): 
+It streamlines multiple operations such as filtering and mutating.
+
+```{r}
+house_location<- house_sale %>%
+  filter(Location == "Dhaula Kuan") %>%
+  mutate(price_per_sqft = HousePrice / (StoreArea+BasementArea+LawnArea))
+
+head(house_location %>% select(Location, price_per_sqft), 5)
+
+```
+
+## Tee Pipe (%T>%)
+Use to print interim output while retaining the original data.
+
+```{r}
+house_location<- house_sale %>%
+  filter(Location == "Dhaula Kuan") %>% 
+  head(5)%T>%
+  print() %>% 
+  mutate(price_per_sqft = HousePrice / (StoreArea+BasementArea+LawnArea))
+
+```
+
+## Explode Pipe (%$%): 
+Apply calculations directly between specific columns.
+
+```{r}
+house_sale %$%
+  cor(HousePrice, BasementArea)  # Finds the correlation between HousePrice and BasementArea
+```
+## Assignment Pipe (%<>%): 
+Mutate house_sale directly without reassigning each time.
+
+```{r}
+house_location %<>% 
+  mutate(price_per_sqft2 = HousePrice / BasementArea)
+
+print(head(house_location$price_per_sqft2))
+```
+# Chapter 15: Functions
+Functions in R help automate repetitive tasks, making your code cleaner and easier to maintain.
+
+
+## Writing functions examples
+Below, we are trying to calculate squares of numbers and returning result as a string.
+
+```{r}
+square_number <- function(x, as_string = FALSE) {
+  result <- x^2
+  if (as_string) {
+    return(paste("The square of", x, "is", result))
+  }
+  return(result)
+}
+print(square_number(10,TRUE))
+
+```
+We can also create a function to check if a number is positive or negative.
+
+```{r}
+check_number <- function(x) {
+  if (x > 0) {
+    return("Positive")
+  } else if (x < 0) {
+    return("Negative")
+  } else {
+    return("Zero")
+  }
+}
+
+check_number(10)
+check_number(0)
+check_number(-50)
+
+```
+## Dot-Dot-Dot (...) for Flexible Functions
+
+```{r}
+combine_strings <- function(...) {
+  return(paste(..., collapse = " "))
+}
+
+# Using the function
+print(combine_strings("We", "can't", "overlook", "the", "effect", "of", "game", "theory"))  # 
+
+```
+
+## Lazy Evaluation
+this is a function that only evaluates its arguments when needed.
+```{r}
+lazy_evaluation_example <- function(x) {
+  if (x == 0) {
+    return("Zero is not allowed")
+  }
+  return(1/x)
+}
+
+# Using the function
+print(lazy_evaluation_example(0))  
+print(lazy_evaluation_example(20))
+
+```
+
+## Returning Values and Early Returns
+The below function that sums two numbers but returns early if one of them is zero.
+
+```{r}
+sum_numbers <- function(a, b) {
+  if (a == 0 || b == 0) {
+    return(0)
+  }
+  return(a + b)
+}
+
+# Using the function
+print(sum_numbers(5, 3))
+print(sum_numbers(0, 3))
+
+```

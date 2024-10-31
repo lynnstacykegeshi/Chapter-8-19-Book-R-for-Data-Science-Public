@@ -371,6 +371,71 @@ Vectors</a></li>
 <li><a href="#missing-values" id="toc-missing-values">Missing
 Values</a></li>
 </ul></li>
+<li><a href="#chapter-10" id="toc-chapter-10">Chapter 10</a>
+<ul>
+<li><a href="#mutating-joins" id="toc-mutating-joins">Mutating
+Joins</a></li>
+<li><a href="#filtering-joins" id="toc-filtering-joins">Filtering
+Joins</a></li>
+<li><a href="#set-operations" id="toc-set-operations">Set
+Operations</a></li>
+</ul></li>
+<li><a href="#chapter-11-strings-with-stringr" id="toc-chapter-11-strings-with-stringr">Chapter 11: Strings with
+stringr</a>
+<ul>
+<li><a href="#string-basics" id="toc-string-basics">String
+Basics</a></li>
+<li><a href="#string-length" id="toc-string-length">String
+Length</a></li>
+<li><a href="#combining-strings" id="toc-combining-strings">Combining
+Strings</a></li>
+<li><a href="#subsetting-strings" id="toc-subsetting-strings">Subsetting
+Strings</a></li>
+<li><a href="#locales" id="toc-locales">Locales</a></li>
+<li><a href="#anchors" id="toc-anchors">Anchors</a></li>
+<li><a href="#character-classes-and-alternatives" id="toc-character-classes-and-alternatives">Character Classes and
+Alternatives</a></li>
+<li><a href="#tools" id="toc-tools">Tools</a></li>
+<li><a href="#chapter-12-forecasts-with-forecat" id="toc-chapter-12-forecasts-with-forecat">Chapter 12: Forecasts with
+Forecat</a></li>
+<li><a href="#creating-factors" id="toc-creating-factors">Creating
+Factors</a></li>
+<li><a href="#modifying-factor-order" id="toc-modifying-factor-order">Modifying Factor Order</a></li>
+<li><a href="#modifying-factor-levels" id="toc-modifying-factor-levels">Modifying Factor Levels</a></li>
+</ul></li>
+<li><a href="#chapter-13-date-and-times-wit-lubridate" id="toc-chapter-13-date-and-times-wit-lubridate">Chapter 13: Date and
+times wit lubridate</a>
+<ul>
+<li><a href="#from-strings" id="toc-from-strings">From Strings</a></li>
+</ul></li>
+<li><a href="#getting-components" id="toc-getting-components">Getting
+Components</a>
+<ul>
+<li><a href="#time-spans" id="toc-time-spans">Time Spans</a></li>
+<li><a href="#timezones" id="toc-timezones">Timezones</a></li>
+</ul></li>
+<li><a href="#chapter-14-pipes-with-magrittr" id="toc-chapter-14-pipes-with-magrittr">Chapter 14: Pipes with
+magrittr</a>
+<ul>
+<li><a href="#basic-pipe" id="toc-basic-pipe">Basic Pipe
+(%&gt;%):</a></li>
+<li><a href="#tee-pipe-t" id="toc-tee-pipe-t">Tee Pipe
+(%T&gt;%)</a></li>
+<li><a href="#explode-pipe" id="toc-explode-pipe">Explode Pipe
+(%$%):</a></li>
+<li><a href="#assignment-pipe" id="toc-assignment-pipe">Assignment Pipe
+(%&lt;&gt;%):</a></li>
+</ul></li>
+<li><a href="#chapter-15-functions" id="toc-chapter-15-functions">Chapter 15: Functions</a>
+<ul>
+<li><a href="#writing-functions-examples" id="toc-writing-functions-examples">Writing functions examples</a></li>
+<li><a href="#dot-dot-dot-for-flexible-functions" id="toc-dot-dot-dot-for-flexible-functions">Dot-Dot-Dot (…) for Flexible
+Functions</a></li>
+<li><a href="#lazy-evaluation" id="toc-lazy-evaluation">Lazy
+Evaluation</a></li>
+<li><a href="#returning-values-and-early-returns" id="toc-returning-values-and-early-returns">Returning Values and Early
+Returns</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -389,6 +454,20 @@ perform our analysis based on the content from Chapter 8 - 19</p>
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(stringr)
+library(forcats) # Factor manipulation
+library(lubridate) # Date and time
+library(magrittr) #For Pipe operation</code></pre>
+<pre><code>## 
+## Attaching package: &#39;magrittr&#39;
+## 
+## The following object is masked from &#39;package:purrr&#39;:
+## 
+##     set_names
+## 
+## The following object is masked from &#39;package:tidyr&#39;:
+## 
+##     extract</code></pre>
 <div id="chapter-8" class="section level1">
 <h1>Chapter 8</h1>
 <p>This chapter focuses on importing data into R, specifically using the
@@ -544,6 +623,7 @@ present in the data). tidyr provides tools to handle missing values:</p>
 filling in missing values with NA. Applying this to our data where
 StreetHouseFront had explicit missing values, we filled missing values
 with the median on non missing values.</p>
+<p>##Applying ggplot and dplyr on tidydata</p>
 <pre class="r"><code># Fill missing StreetHouseFront values with the median of non-missing values
 house_sale &lt;- house_sale %&gt;%
   mutate(StreetHouseFront2 = ifelse(is.na(StreetHouseFront), median(StreetHouseFront, na.rm = TRUE), StreetHouseFront))
@@ -605,6 +685,476 @@ ggplot(avg_rating_per_year, aes(x = SellingYear, y = avg_rating)) +
 and spread().</p>
 <p>’separate() and unite() are used to split and combine columns,
 respectively.</p>
+</div>
+</div>
+<div id="chapter-10" class="section level1">
+<h1>Chapter 10</h1>
+<p>Keys are variables that uniquely identify an observation. There are
+two types of keys:</p>
+<ol style="list-style-type: decimal">
+<li>Primary Key: Uniquely identifies an observation in its own
+table.</li>
+<li>Foreign Key: Uniquely identifies an observation in another
+table.</li>
+</ol>
+<div id="mutating-joins" class="section level2">
+<h2>Mutating Joins</h2>
+<p>Mutating joins combine variables from two tables by matching
+observations based on their keys.</p>
+<ul>
+<li>inner_join(): Matches pairs of observations where keys are
+equal.</li>
+<li>left_join(): Keeps all observations in the left table.</li>
+<li>right_join(): Keeps all observations in the right table.</li>
+<li>full_join(): Keeps all observations in both tables.</li>
+</ul>
+<p>Joins are visualized by matching rows based on key variables.</p>
+</div>
+<div id="filtering-joins" class="section level2">
+<h2>Filtering Joins</h2>
+<p>Filtering joins match observations and affect the observations, not
+the variables:</p>
+<p>semi_join(): Keeps all observations in the left table that have a
+match in the right table. anti_join(): Drops all observations in the
+left table that have a match in the right table.</p>
+</div>
+<div id="set-operations" class="section level2">
+<h2>Set Operations</h2>
+<p>You can use set operations to compare data in tables.</p>
+<p>Use intersect()if you have two tables with house data and want to
+find common entries, Use union() to combine two tables without
+duplicates. Use setdiff() to find rows present in one table but not in
+the other</p>
+<p>When working with real data, identify the primary keys and make sure
+no primary key variables are missing Using anti_join() to check if all
+foreign key values in one table match primary key values in another.</p>
+</div>
+</div>
+<div id="chapter-11-strings-with-stringr" class="section level1">
+<h1>Chapter 11: Strings with stringr</h1>
+<p>It introduces string manipulation in R using stringr which is part of
+the stringr package.</p>
+<div id="string-basics" class="section level2">
+<h2>String Basics</h2>
+<p>Strings can be created using either single or double quotes. To
+include special characters like quotes or backslashes, use the escape
+character <code>\.</code> The writeLines() function shows the raw
+contents of a string.</p>
+</div>
+<div id="string-length" class="section level2">
+<h2>String Length</h2>
+<p>The str_length() function from stringr tells you the number of
+characters in a string:</p>
+<pre class="r"><code>str_length(c(&quot;a&quot;, &quot;R for data science&quot;, NA))</code></pre>
+<pre><code>## [1]  1 18 NA</code></pre>
+</div>
+<div id="combining-strings" class="section level2">
+<h2>Combining Strings</h2>
+<p>Use str_c() to combine two or more strings. The sep argument controls
+how they are separated, and collapse collapses a vector of strings into
+a single string:</p>
+<pre class="r"><code># Add details column, which is combines Location and BuildingType
+house_sale &lt;- house_sale %&gt;%
+  mutate(details = str_c(Location, BuildingType, sep = &quot;, &quot;))
+
+head(house_sale$details)</code></pre>
+<pre><code>## [1] &quot;RK Puram, IndividualHouse&quot;    &quot;Jama Masjid, IndividualHouse&quot;
+## [3] &quot;Burari, IndividualHouse&quot;      &quot;RK Puram, IndividualHouse&quot;   
+## [5] &quot;Bawana, IndividualHouse&quot;      &quot;Timarpur, IndividualHouse&quot;</code></pre>
+</div>
+<div id="subsetting-strings" class="section level2">
+<h2>Subsetting Strings</h2>
+<p>The str_sub() function extracts parts of a string based on start and
+end positions. It can also be used to modify strings:</p>
+<pre class="r"><code>x &lt;- c(&quot;Apple&quot;, &quot;Banana&quot;, &quot;Pear&quot;)
+str_sub(x, 1, 3)</code></pre>
+<pre><code>## [1] &quot;App&quot; &quot;Ban&quot; &quot;Pea&quot;</code></pre>
+</div>
+<div id="locales" class="section level2">
+<h2>Locales</h2>
+<p>Functions like str_to_lower(), str_to_upper(), and str_to_title()
+change the case of text. We changed the case of the vectors in Building
+Type to small letters with the code below:</p>
+<pre class="r"><code>house_sale &lt;- house_sale %&gt;%
+    mutate(BuildingType = str_to_lower(BuildingType))
+
+head(house_sale$BuildingType)</code></pre>
+<pre><code>## [1] &quot;individualhouse&quot; &quot;individualhouse&quot; &quot;individualhouse&quot; &quot;individualhouse&quot;
+## [5] &quot;individualhouse&quot; &quot;individualhouse&quot;</code></pre>
+</div>
+<div id="anchors" class="section level2">
+<h2>Anchors</h2>
+<p>Anchors like ^ and $ match the start and end of a string,
+respectively. The word boundary atches the boundary between words.</p>
+</div>
+<div id="character-classes-and-alternatives" class="section level2">
+<h2>Character Classes and Alternatives</h2>
+<p>Special patterns match more than one character:</p>
+<ul>
+<li><code>\d</code> matches any digit.</li>
+<li><code>\s</code> matches any whitespace.</li>
+<li>[abc] matches a, b, or c.</li>
+<li>[^abc] matches anything except a, b, or c.</li>
+</ul>
+</div>
+<div id="tools" class="section level2">
+<h2>Tools</h2>
+<p>Various stringr functions apply regexps to real problems:</p>
+<ol style="list-style-type: decimal">
+<li>str_detect(): Determines if a character vector matches a
+pattern.</li>
+<li>str_extract(): Extracts the actual text of a match.</li>
+<li>str_replace() and str_replace_all(): Replace matches with new
+values.</li>
+<li>str_split(): Splits a string into pieces.</li>
+<li>str_locate() and str_locate_all(): Give the starting and ending
+positions of each match.</li>
+</ol>
+</div>
+<div id="chapter-12-forecasts-with-forecat" class="section level2">
+<h2>Chapter 12: Forecasts with Forecat</h2>
+<p>In R, factors are used to work with categorical variables, which have
+a fixed and known set of possible values. To work with factors, the
+forcats package is used, which provides tools for dealing with
+categorical variables.</p>
+</div>
+<div id="creating-factors" class="section level2">
+<h2>Creating Factors</h2>
+<p>When recording variables like months, using strings can lead to
+issues such as typos and unhelpful sorting. These problems can be fixed
+by creating a factor with a predefined list of valid levels. For
+example:</p>
+<pre class="r"><code>x1 &lt;- c(&quot;Dec&quot;, &quot;Apr&quot;, &quot;Jan&quot;, &quot;Mar&quot;)
+month_levels &lt;- c(&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;)
+y1 &lt;- factor(x1, levels = month_levels)
+y1</code></pre>
+<pre><code>## [1] Dec Apr Jan Mar
+## Levels: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec</code></pre>
+</div>
+<div id="modifying-factor-order" class="section level2">
+<h2>Modifying Factor Order</h2>
+<p>Changing the order of factor levels in visualizations can make
+patterns easier to interpret. Functions like fct_reorder() and
+fct_relevel() are used to reorder levels based on specific criteria. For
+example, we can reorder Building type based on houseprice.</p>
+<pre class="r"><code># Reorder BuildingType based on average HousePrice
+house_sale %&gt;%
+  ggplot(aes(x = HousePrice, y = fct_reorder(BuildingType, HousePrice))) + 
+  geom_point() + 
+  labs(title = &quot;House Prices by Building Type&quot;, x = &quot;House Price&quot;, y = &quot;Building Type&quot;)</code></pre>
+<p><img role="img" src="data:image/png;base64,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" width="672" /></p>
+</div>
+<div id="modifying-factor-levels" class="section level2">
+<h2>Modifying Factor Levels</h2>
+<p>Changing the values of factor levels can clarify labels and collapse
+levels for high-level displays. The fct_recode() function allows users
+to recode factor levels. Basically renaming.</p>
+<pre class="r"><code>#Converting EstateType from character to factor
+
+house_sale &lt;- house_sale %&gt;%
+  mutate(EstateType = as.factor(EstateType))
+
+# Recode EstateType levels
+house_sale &lt;- house_sale %&gt;% 
+  mutate(EstateTypeNew = fct_recode(EstateType, 
+                                 &quot;Private-Builder&quot; = &quot;PrivateBuilder&quot;, 
+                                 &quot;Semi-Private&quot; = &quot;SemiPrivate&quot;,
+                                 &quot;Gvt-Build&quot; = &quot;GovernmentBuild&quot;,
+                                 &quot;Community&quot; = &quot;Society&quot;,
+                                 &quot;Other&quot; = &quot;Other&quot;))
+
+head(house_sale$EstateTypeNew)</code></pre>
+<pre><code>## [1] Other        Other        Other        Other        Other       
+## [6] Semi-Private
+## Levels: Gvt-Build Other Private-Builder Semi-Private Community</code></pre>
+<p>To combine groups, multiple old levels can be assigned to the same
+new level. For collapsing many levels, fct_collapse() is useful.</p>
+<pre class="r"><code>#Converting EstateType from character to factor
+house_sale &lt;- house_sale %&gt;%
+  mutate(SaleType = as.factor(SaleType))
+
+# Collapse SaleType levels into broader categories
+house_sale &lt;- house_sale %&gt;% 
+  mutate(SaleType2 = fct_collapse(SaleType, 
+                                  &quot;New&quot; = c(&quot;NewHouse&quot;), 
+                                  &quot;Old&quot; = c(&quot;FifthResale&quot;, &quot;FirstResale&quot;, &quot;FourthResale&quot;, &quot;SecondResale&quot;,&quot;ThirdResale&quot;)))
+
+# Count new sale types
+print(head(house_sale$SaleType2))</code></pre>
+<pre><code>## [1] New New New New New New
+## Levels: Old New</code></pre>
+</div>
+</div>
+<div id="chapter-13-date-and-times-wit-lubridate" class="section level1">
+<h1>Chapter 13: Date and times wit lubridate</h1>
+<p>This chapter explored working with dates and time in R. This will be
+done using the lubridate package.</p>
+<p>There are three types of date/time data that refer to an instant in
+time:</p>
+<ol style="list-style-type: decimal">
+<li>A date. Tibbles print this as <date>.</li>
+<li>A time within a day. Tibbles print this as <time>.</li>
+<li>A datetime is a date plus a time: it uniquely identifies an instant
+in time (typically to the nearest second). Tibbles print this as <dttm>.
+Elsewhere in R these are called POSIXct. To get the current date or
+datetime you can use today() or now():</li>
+</ol>
+<pre class="r"><code>today()</code></pre>
+<pre><code>## [1] &quot;2024-10-31&quot;</code></pre>
+<pre class="r"><code>now()</code></pre>
+<pre><code>## [1] &quot;2024-10-31 15:21:28 EAT&quot;</code></pre>
+<div id="from-strings" class="section level2">
+<h2>From Strings</h2>
+<p>Date/time data often comes as strings. lubridate provides helpers
+that automatically work out the format once you specify the order of the
+component. For example:</p>
+<pre class="r"><code>ymd(&quot;2017-01-31&quot;)         </code></pre>
+<pre><code>## [1] &quot;2017-01-31&quot;</code></pre>
+<pre class="r"><code>mdy(&quot;January 31st, 2017&quot;) </code></pre>
+<pre><code>## [1] &quot;2017-01-31&quot;</code></pre>
+<pre class="r"><code>dmy(&quot;31-Jan-2017&quot;)        </code></pre>
+<pre><code>## [1] &quot;2017-01-31&quot;</code></pre>
+<p>To create a datetime, add an underscore and one or more of “h”, “m”,
+and “s” to the name of the parsing function:</p>
+<pre class="r"><code>ymd_hms(&quot;2017-01-31 20:11:59&quot;) </code></pre>
+<pre><code>## [1] &quot;2017-01-31 20:11:59 UTC&quot;</code></pre>
+<pre class="r"><code>mdy_hm(&quot;01/31/2017 08:01&quot;)    </code></pre>
+<pre><code>## [1] &quot;2017-01-31 08:01:00 UTC&quot;</code></pre>
+<p>In some instances, different components of the datetime will be
+spread across multiple columns. To create a date/time from this sort of
+input, use make_date() for dates, or make_datetime() for datetimes.</p>
+<p>You may want to switch between a datetime and a date. That’s the job
+of as_datetime() and as_date()</p>
+</div>
+</div>
+<div id="getting-components" class="section level1">
+<h1>Getting Components</h1>
+<p>You can pull out individual parts of the date with the accessor
+functions year(), month(), mday() (day of the month), yday() (day of the
+year), wday() (day of the week), hour(), minute(), and second().</p>
+<pre class="r"><code>datetime &lt;- ymd_hms(&quot;2016-07-08 12:34:56&quot;)
+year(datetime)   </code></pre>
+<pre><code>## [1] 2016</code></pre>
+<pre class="r"><code>month(datetime)  </code></pre>
+<pre><code>## [1] 7</code></pre>
+<pre class="r"><code>mday(datetime)   </code></pre>
+<pre><code>## [1] 8</code></pre>
+<pre class="r"><code>yday(datetime)   </code></pre>
+<pre><code>## [1] 190</code></pre>
+<pre class="r"><code>wday(datetime)   </code></pre>
+<pre><code>## [1] 6</code></pre>
+<p>For month() and wday() you can set label = TRUE to return the
+abbreviated name of the month or day of the week.</p>
+<div id="time-spans" class="section level2">
+<h2>Time Spans</h2>
+<p>These classes represent time spans.</p>
+<ul>
+<li>Durations, which represent an exact number of seconds.</li>
+<li>Periods, which represent human units like weeks and months.</li>
+<li>Intervals, which represent a starting and ending point.</li>
+</ul>
+<p>In R, when you subtract two dates, you get a difftime object.</p>
+<p>Now for durations, durations come with a number of convenient
+constructors.</p>
+<pre class="r"><code>dseconds(15)   </code></pre>
+<pre><code>## [1] &quot;15s&quot;</code></pre>
+<pre class="r"><code>dminutes(10)   </code></pre>
+<pre><code>## [1] &quot;600s (~10 minutes)&quot;</code></pre>
+<pre class="r"><code>dhours(c(12, 24)) </code></pre>
+<pre><code>## [1] &quot;43200s (~12 hours)&quot; &quot;86400s (~1 days)&quot;</code></pre>
+<pre class="r"><code>ddays(0:5)    </code></pre>
+<pre><code>## [1] &quot;0s&quot;                &quot;86400s (~1 days)&quot;  &quot;172800s (~2 days)&quot;
+## [4] &quot;259200s (~3 days)&quot; &quot;345600s (~4 days)&quot; &quot;432000s (~5 days)&quot;</code></pre>
+<pre class="r"><code>dweeks(3)      </code></pre>
+<pre><code>## [1] &quot;1814400s (~3 weeks)&quot;</code></pre>
+<pre class="r"><code>dyears(1) </code></pre>
+<pre><code>## [1] &quot;31557600s (~1 years)&quot;</code></pre>
+<p>Periods are time spans but do not have a fixed length in seconds;
+instead, they work with “human” times, like days and months.</p>
+<pre class="r"><code>one_pm &lt;- ymd_hms(&quot;2016-03-12 13:00:00&quot;, tz = &quot;America/New_York&quot;)
+one_pm + days(1)</code></pre>
+<pre><code>## [1] &quot;2016-03-13 13:00:00 EDT&quot;</code></pre>
+<p>Period can also be constructed with friendly constructors.</p>
+<pre class="r"><code>seconds(15)    </code></pre>
+<pre><code>## [1] &quot;15S&quot;</code></pre>
+<pre class="r"><code>minutes(10)    </code></pre>
+<pre><code>## [1] &quot;10M 0S&quot;</code></pre>
+<pre class="r"><code>hours(c(12, 24)) </code></pre>
+<pre><code>## [1] &quot;12H 0M 0S&quot; &quot;24H 0M 0S&quot;</code></pre>
+<pre class="r"><code>days(7)       </code></pre>
+<pre><code>## [1] &quot;7d 0H 0M 0S&quot;</code></pre>
+<pre class="r"><code>months(1:6)    </code></pre>
+<pre><code>## [1] &quot;1m 0d 0H 0M 0S&quot; &quot;2m 0d 0H 0M 0S&quot; &quot;3m 0d 0H 0M 0S&quot; &quot;4m 0d 0H 0M 0S&quot;
+## [5] &quot;5m 0d 0H 0M 0S&quot; &quot;6m 0d 0H 0M 0S&quot;</code></pre>
+<pre class="r"><code>weeks(3)       </code></pre>
+<pre><code>## [1] &quot;21d 0H 0M 0S&quot;</code></pre>
+<pre class="r"><code>years(1)      </code></pre>
+<pre><code>## [1] &quot;1y 0m 0d 0H 0M 0S&quot;</code></pre>
+</div>
+<div id="timezones" class="section level2">
+<h2>Timezones</h2>
+<p>One can find out what R thinks the current time zone is with
+Sys.timezone() And see the complete list of all time zone names with
+OlsonNames()</p>
+<pre class="r"><code>Sys.timezone()</code></pre>
+<pre><code>## [1] &quot;Africa/Nairobi&quot;</code></pre>
+<pre class="r"><code>length(OlsonNames())</code></pre>
+<pre><code>## [1] 596</code></pre>
+<pre class="r"><code>head(OlsonNames())  </code></pre>
+<pre><code>## [1] &quot;Africa/Abidjan&quot;     &quot;Africa/Accra&quot;       &quot;Africa/Addis_Ababa&quot;
+## [4] &quot;Africa/Algiers&quot;     &quot;Africa/Asmara&quot;      &quot;Africa/Asmera&quot;</code></pre>
+</div>
+</div>
+<div id="chapter-14-pipes-with-magrittr" class="section level1">
+<h1>Chapter 14: Pipes with magrittr</h1>
+<p>Pipes are used to express a sequence of multiple operations. Since
+the tidyverse library automatically loads dplyr and %&gt;%, we won’t
+need to load magrittr explicitly.Applying the learnings of this chapter
+to my house_sale data:</p>
+<div id="basic-pipe" class="section level2">
+<h2>Basic Pipe (%&gt;%):</h2>
+<p>It streamlines multiple operations such as filtering and
+mutating.</p>
+<pre class="r"><code>house_location&lt;- house_sale %&gt;%
+  filter(Location == &quot;Dhaula Kuan&quot;) %&gt;%
+  mutate(price_per_sqft = HousePrice / (StoreArea+BasementArea+LawnArea))
+
+head(house_location %&gt;% select(Location, price_per_sqft), 5)</code></pre>
+<pre><code>##      Location price_per_sqft
+## 1 Dhaula Kuan       15.88115
+## 2 Dhaula Kuan       16.21472
+## 3 Dhaula Kuan       14.18628
+## 4 Dhaula Kuan        1.73032
+## 5 Dhaula Kuan       11.02739</code></pre>
+</div>
+<div id="tee-pipe-t" class="section level2">
+<h2>Tee Pipe (%T&gt;%)</h2>
+<p>Use to print interim output while retaining the original data.</p>
+<pre class="r"><code>house_location&lt;- house_sale %&gt;%
+  filter(Location == &quot;Dhaula Kuan&quot;) %&gt;% 
+  head(5)%T&gt;%
+  print() %&gt;% 
+  mutate(price_per_sqft = HousePrice / (StoreArea+BasementArea+LawnArea))</code></pre>
+<pre><code>##   HOUSE_ID HousePrice StoreArea BasementArea LawnArea StreetHouseFront
+## 1       23     155000       440          504     8816               80
+## 2       35     235000       564          429    13500               NA
+## 3      104     187500       444          568    12205               NA
+## 4      111     277000       389          697   159000               NA
+## 5      138     200500         0          152    18030              138
+##      Location ConnectivityType    BuildingType ConstructionYear  EstateType
+## 1 Dhaula Kuan            Byway individualhouse             1971 SemiPrivate
+## 2 Dhaula Kuan            Byway individualhouse             1960       Other
+## 3 Dhaula Kuan            Byway individualhouse             1966       Other
+## 4 Dhaula Kuan            Byway individualhouse             1958       Other
+## 5 Dhaula Kuan            Byway individualhouse             1946 SemiPrivate
+##   SellingYear Rating SaleType StreetHouseFront2                      details
+## 1        2010      6 NewHouse                80 Dhaula Kuan, IndividualHouse
+## 2        2008      6 NewHouse                70 Dhaula Kuan, IndividualHouse
+## 3        2007      6 NewHouse                70 Dhaula Kuan, IndividualHouse
+## 4        2007      6 NewHouse                70 Dhaula Kuan, IndividualHouse
+## 5        2007      5 NewHouse               138 Dhaula Kuan, IndividualHouse
+##   EstateTypeNew SaleType2
+## 1  Semi-Private       New
+## 2         Other       New
+## 3         Other       New
+## 4         Other       New
+## 5  Semi-Private       New</code></pre>
+</div>
+<div id="explode-pipe" class="section level2">
+<h2>Explode Pipe (%$%):</h2>
+<p>Apply calculations directly between specific columns.</p>
+<pre class="r"><code>house_sale %$%
+  cor(HousePrice, BasementArea)  # Finds the correlation between HousePrice and BasementArea</code></pre>
+<pre><code>## [1] 0.3939375</code></pre>
+</div>
+<div id="assignment-pipe" class="section level2">
+<h2>Assignment Pipe (%&lt;&gt;%):</h2>
+<p>Mutate house_sale directly without reassigning each time.</p>
+<pre class="r"><code>house_location %&lt;&gt;% 
+  mutate(price_per_sqft2 = HousePrice / BasementArea)
+
+print(head(house_location$price_per_sqft2))</code></pre>
+<pre><code>## [1]  307.5397  547.7855  330.1056  397.4175 1319.0789</code></pre>
+</div>
+</div>
+<div id="chapter-15-functions" class="section level1">
+<h1>Chapter 15: Functions</h1>
+<p>Functions in R help automate repetitive tasks, making your code
+cleaner and easier to maintain.</p>
+<div id="writing-functions-examples" class="section level2">
+<h2>Writing functions examples</h2>
+<p>Below, we are trying to calculate squares of numbers and returning
+result as a string.</p>
+<pre class="r"><code>square_number &lt;- function(x, as_string = FALSE) {
+  result &lt;- x^2
+  if (as_string) {
+    return(paste(&quot;The square of&quot;, x, &quot;is&quot;, result))
+  }
+  return(result)
+}
+print(square_number(10,TRUE))</code></pre>
+<pre><code>## [1] &quot;The square of 10 is 100&quot;</code></pre>
+<p>We can also create a function to check if a number is positive or
+negative.</p>
+<pre class="r"><code>check_number &lt;- function(x) {
+  if (x &gt; 0) {
+    return(&quot;Positive&quot;)
+  } else if (x &lt; 0) {
+    return(&quot;Negative&quot;)
+  } else {
+    return(&quot;Zero&quot;)
+  }
+}
+
+check_number(10)</code></pre>
+<pre><code>## [1] &quot;Positive&quot;</code></pre>
+<pre class="r"><code>check_number(0)</code></pre>
+<pre><code>## [1] &quot;Zero&quot;</code></pre>
+<pre class="r"><code>check_number(-50)</code></pre>
+<pre><code>## [1] &quot;Negative&quot;</code></pre>
+</div>
+<div id="dot-dot-dot-for-flexible-functions" class="section level2">
+<h2>Dot-Dot-Dot (…) for Flexible Functions</h2>
+<pre class="r"><code>combine_strings &lt;- function(...) {
+  return(paste(..., collapse = &quot; &quot;))
+}
+
+# Using the function
+print(combine_strings(&quot;We&quot;, &quot;can&#39;t&quot;, &quot;overlook&quot;, &quot;the&quot;, &quot;effect&quot;, &quot;of&quot;, &quot;game&quot;, &quot;theory&quot;))  # </code></pre>
+<pre><code>## [1] &quot;We can&#39;t overlook the effect of game theory&quot;</code></pre>
+</div>
+<div id="lazy-evaluation" class="section level2">
+<h2>Lazy Evaluation</h2>
+<p>this is a function that only evaluates its arguments when needed.</p>
+<pre class="r"><code>lazy_evaluation_example &lt;- function(x) {
+  if (x == 0) {
+    return(&quot;Zero is not allowed&quot;)
+  }
+  return(1/x)
+}
+
+# Using the function
+print(lazy_evaluation_example(0))  </code></pre>
+<pre><code>## [1] &quot;Zero is not allowed&quot;</code></pre>
+<pre class="r"><code>print(lazy_evaluation_example(20))</code></pre>
+<pre><code>## [1] 0.05</code></pre>
+</div>
+<div id="returning-values-and-early-returns" class="section level2">
+<h2>Returning Values and Early Returns</h2>
+<p>The below function that sums two numbers but returns early if one of
+them is zero.</p>
+<pre class="r"><code>sum_numbers &lt;- function(a, b) {
+  if (a == 0 || b == 0) {
+    return(0)
+  }
+  return(a + b)
+}
+
+# Using the function
+print(sum_numbers(5, 3))</code></pre>
+<pre><code>## [1] 8</code></pre>
+<pre class="r"><code>print(sum_numbers(0, 3))</code></pre>
+<pre><code>## [1] 0</code></pre>
 </div>
 </div>
 
